@@ -2,7 +2,7 @@
 
 To run Frontend
 ```
-cd frontend
+cd frontend/
 yarn install
 yarn start
 ```
