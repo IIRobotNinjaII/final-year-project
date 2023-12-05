@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { useContract, useContractWrite } from "@thirdweb-dev/react";
+import { encryptText } from '../utils/encrypt';
 
-const Complaint = () => {
+const Complaint = ({secretKey}) => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [name,setName] = useState("");
     const [dept,setDept] = useState("");
     const [rollno, setRollno] = useState("");
 
-    const { contract } = useContract("0x811e46292aF2Af63ac15553E0Ec7Ac3fd4871377");
+    const { contract } = useContract(process.env.REACT_APP_CONTRACT_ID);
     const { mutateAsync: fileComplaint, isLoading } = useContractWrite(contract, "fileComplaint");
 
     const handleComplaint = async () => {
         try {
-            const data = await fileComplaint({ args: [title, description, name, dept, rollno] });
+            const data = await fileComplaint({ args: [encryptText(title,secretKey), encryptText(description,secretKey), encryptText(name,secretKey), encryptText(dept,secretKey), encryptText(rollno,secretKey)] });
             console.info("contract call successs", data);
             setTitle("");
             setDescription("");
