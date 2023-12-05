@@ -3,7 +3,7 @@
 1)Get Metamask
 https://metamask.io/
 Install to your browser
-Make 4 accounts , User 1, Officer 1 , Officer 2, Officer 3
+Make 4 accounts , User 1, Officer 1 , Officer 2, Officer 3 <br />
 Add Polygon Mumbai Test Network to your metmask, follow the below link
 https://www.datawallet.com/crypto/add-polygon-mumbai-to-metamask
 Add matic token to each of your accounts, go to the below website and do for each account
