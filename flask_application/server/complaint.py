@@ -3,11 +3,10 @@ from flask_login import login_required, current_user
 from .helpers import global_variables,authorization
 import copy
 from . import db
-from .models import Complaint, Comment
+from .models import Complaint, Comment, UserType
 import json
 from charm.toolbox.msp import MSP
 from charm.core.math.integer import integer,serialize,deserialize
-from .mongo_models import User as mUser,UserType
 
 complaint = Blueprint('complaint', __name__)
 
