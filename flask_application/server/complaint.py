@@ -1,12 +1,11 @@
-from flask import Flask, Blueprint, render_template, request, jsonify, session, redirect, url_for
+from flask import  Blueprint,  request, jsonify, session
 from flask_login import login_required, current_user
 from .helpers import global_variables,authorization
-import copy
 from . import db
 from .models import Complaint, Comment, UserType
 import json
 from charm.toolbox.msp import MSP
-from charm.core.math.integer import integer,serialize,deserialize
+from charm.core.math.integer import serialize,deserialize
 
 complaint = Blueprint('complaint', __name__)
 
