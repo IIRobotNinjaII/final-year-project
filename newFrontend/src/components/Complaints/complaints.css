@@ -1,0 +1,81 @@
+/* Main container */
+.main-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start; 
+  justify-content: space-around;
+}
+
+.complaint-container {
+  flex: 1;
+  margin: 0 2vw;
+  height: 100vh;
+  overflow-y: auto; 
+  min-width: 30vw;
+  max-width: 55vw;
+}
+
+.complaint-container::-webkit-scrollbar {
+  display: none;
+}
+
+.submit-complaint-form {
+  display: flex;
+  justify-content: flex-end;
+  position: sticky;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  min-width: 40vw;
+  justify-content: space-between;
+  align-items: center;
+  color: black;
+}
+
+.header .complaint-heading {
+  z-index: 99;
+  margin: 0 auto;
+}
+
+.header .header-btn { 
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 20px;
+  background-color: rgb(246, 246, 246);
+  box-shadow: 0 6px 9px rgb(191, 192, 192);
+}
+
+
+.complaint-card {
+  display: flex;
+  justify-content: space-around;
+
+  max-height: 40vh;
+  min-height: 10vh;
+  
+  border-radius: 8px;
+  padding: 20px;
+  
+  margin: 1vw 0;
+  cursor: pointer;
+  background-color: rgb(246, 246, 246);
+  box-shadow: 0 6px 9px rgb(191, 192, 192);
+}
+
+.complaint-card h3 {
+  width: 2vw;
+  padding: 5px 10px;
+}
+
+.complaint-details {
+  width: 46vw;
+  overflow-y: auto;
+}
+
+.translucent-line {
+  width: 1px; 
+  background-color: #eef5ff; 
+  margin: 20px 0;
+}
