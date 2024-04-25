@@ -27,6 +27,7 @@
 
 .header {
   display: flex;
+  margin: 2vh 0;
   flex-direction: row;
   min-width: 40vw;
   justify-content: space-between;

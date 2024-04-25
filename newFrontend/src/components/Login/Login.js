@@ -1,6 +1,6 @@
 // Login.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Login.css';
 
@@ -8,11 +8,12 @@ const Login = ({ setIsLoggedIn, setSessionUserType }) => {
   const [userType, setUserType] = useState('user');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      e.preventDefault();
 
       const response = await axios.post(
         `http://localhost:8080/login/${userType}`,
@@ -21,24 +22,20 @@ const Login = ({ setIsLoggedIn, setSessionUserType }) => {
       );
 
       if (response.status !== 200) {
-        setError(true);
-        throw Error('Login Unsuccessful!');
+        throw Error();
+      } else {
+        setIsLoggedIn(true);
+        setSessionUserType(userType);
+        navigate('/complaints');
       }
-
-      setError(false);
-      setSessionUserType(userType);
-      setIsLoggedIn(true);
-      const sessionState = {
-        isLoggedIn: true,
-        userType: userType,
-        expiry: new Date().getTime() + 6000
-      }
-
-      localStorage.setItem('sessionState', JSON.stringify(sessionState));
     } catch (error) {
       setError(true);
     }
   };
+
+  const handleUserTypeChange = (e) => {
+    setUserType(e.target.value);
+  }
 
   return (
     <div className="main-login-form-container">
@@ -52,7 +49,7 @@ const Login = ({ setIsLoggedIn, setSessionUserType }) => {
               type="radio"
               value="user"
               checked={userType === 'user'}
-              onChange={(e) => setUserType(e.target.value)}
+              onChange={handleUserTypeChange}
               className='toggle-input'
             />
             <label className="toggle-label" htmlFor="user">
@@ -63,7 +60,7 @@ const Login = ({ setIsLoggedIn, setSessionUserType }) => {
               type="radio"
               value="officer"
               checked={userType === 'officer'}
-              onChange={(e) => setUserType(e.target.value)}
+              onChange={handleUserTypeChange}
               className='toggle-input'
             />
             <label className="toggle-label" htmlFor="officer">
@@ -90,7 +87,7 @@ const Login = ({ setIsLoggedIn, setSessionUserType }) => {
               required
             />
           </div>
-          <button type="submit" onClick={handleSubmit}>
+          <button type="submit">
             Login
           </button>
         </form>

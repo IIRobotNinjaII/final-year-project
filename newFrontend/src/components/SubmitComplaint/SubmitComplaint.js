@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import './SubmitComplaintForm.css';
 
 const SubmitComplaintForm = () => {
-  const [formData, setFormData] = useState({
-    text: '',
-    category: '',
-  });
+  const [body, setBody] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setBody({
+      ...body,
       [name]: value,
     });
   };
@@ -18,16 +16,11 @@ const SubmitComplaintForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/complaint/file', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      if (!response.ok) {
+      const response = await axios.post('http://localhost:8080/complaint/file', body, { withCredentials: true });
+      if (response.status !== 201) {
         throw new Error('Failed to submit complaint');
       }
+      setBody({});
       alert('Complaint submitted successfully!');
     } catch (error) {
       console.error('Error submitting complaint:', error);
@@ -45,7 +38,7 @@ const SubmitComplaintForm = () => {
             id="complaint-description"
             className="complaint-description"
             name="text"
-            value={formData.text}
+            value={body.text}
             onChange={handleChange}
             placeholder="Complaint Description"
             required
@@ -63,7 +56,7 @@ const SubmitComplaintForm = () => {
               name="category"
               value="Accounting"
               onChange={handleChange}
-              checked={formData.category === 'Accounting'}
+              checked={body.category === 'Accounting'}
             />
             <label htmlFor="category-accounting">Accounting</label>
 
@@ -74,7 +67,7 @@ const SubmitComplaintForm = () => {
               name="category"
               value="Academic"
               onChange={handleChange}
-              checked={formData.category === 'Academic'}
+              checked={body.category === 'Academic'}
             />
             <label htmlFor="category-academic">Academic</label>
 
@@ -85,7 +78,7 @@ const SubmitComplaintForm = () => {
               name="category"
               value="Hostel"
               onChange={handleChange}
-              checked={formData.category === 'Hostel'}
+              checked={body.category === 'Hostel'}
             />
             <label htmlFor="category-hostel">Hostel</label>
           </div>

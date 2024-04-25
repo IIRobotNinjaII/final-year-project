@@ -1,21 +1,21 @@
 // Sign-Up.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Signup.css';
 
-const Signup = ({ setSignupSuccess }) => {
+const Signup = () => {
   const [userType, setUserType] = useState('user');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-
+    e.preventDefault();
     try {
-      e.preventDefault();
-      
+
       const url = `http://localhost:8080/signup/${userType}`;
       const body = {
         name: name,
@@ -24,15 +24,14 @@ const Signup = ({ setSignupSuccess }) => {
       };
 
       const response = await axios.post(url, body);
-      
-      if(response.status !== 201) { 
+
+      if (response.status !== 201) {
         throw Error('Could not signup');
+      } else {
+        navigate('/auth/login');
       }
 
-      setError(false);
-      setSignupSuccess(true);
-
-    } catch(error) {
+    } catch (error) {
       setError(true);
     }
   };
@@ -42,7 +41,7 @@ const Signup = ({ setSignupSuccess }) => {
       <div className="signup-form-container">
         <form onSubmit={handleSubmit} className="signup-form">
           <h2>Sign-Up</h2>
-          {error &&<p className='error'>Please try again!</p>}
+          {error && <p className='error'>Please try again!</p>}
           <div className="user-type">
             <input
               id="user"
@@ -95,7 +94,7 @@ const Signup = ({ setSignupSuccess }) => {
               required
             />
           </div>
-          <button type="submit" onClick={handleSubmit}>Sign-Up</button>
+          <button type="submit">Sign-Up</button>
         </form>
         <div className="login-link">
           Already have an account? <Link to="/auth/login">Log In</Link> here.

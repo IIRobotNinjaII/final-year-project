@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import SubmitComplaintForm from '../SubmitComplaint/SubmitComplaint';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios';
-import './complaints.css';
+import React, { useState, useEffect } from "react";
+import SubmitComplaintForm from "../SubmitComplaint/SubmitComplaint";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
+import "./complaints.css";
 
 const Complaints = ({ userType }) => {
   const [showSubmitForm, setShowSubmitForm] = useState(false);
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
-
     const fetchData = async () => {
       try {
+
+        let url = 'http://localhost:8080/complaint/';
+        if (userType === 'user') url += 'mycomplaints';
+        else if (userType === 'officer' || userType === 'admin') url += 'view';
+        else throw Error();
+
         const fetchedData = await axios.get(
-          `http://localhost:8080/complaint/${
-            userType === 'user' ? 'mycomplaints' : 'view'
-          }`,
+          url,
           { withCredentials: true }
         );
 
         setComplaints(fetchedData.data.complaints);
-        console.log(userType);
       } catch (error) {
         console.error(error);
       }
@@ -34,10 +36,10 @@ const Complaints = ({ userType }) => {
     setShowSubmitForm(!showSubmitForm);
   };
 
-  const handleNavback = () => {
-    localStorage.clear();
+  const handleNavback = async () => {
     window.location.reload();
   };
+
 
   return (
     <div className="main-container">
@@ -48,12 +50,14 @@ const Complaints = ({ userType }) => {
             icon={faArrowLeft}
             onClick={handleNavback}
           />
-          <h1 className='complaint-heading'>Complaints</h1>
-          { (userType === 'user') && <FontAwesomeIcon
-            className="submit-complaint-button header-btn"
-            icon={faEdit}
-            onClick={handleToggleForm}
-          />}
+          <h1 className="complaint-heading">Complaints</h1>
+          {userType === "user" && (
+            <FontAwesomeIcon
+              className="submit-complaint-button header-btn"
+              icon={faEdit}
+              onClick={handleToggleForm}
+            />
+          )}
         </div>
         {complaints.map((complaint) => (
           <div key={complaint.complaint.id} className="complaint-card">
@@ -63,7 +67,7 @@ const Complaints = ({ userType }) => {
                 <div className="comments">
                   <p>
                     <b>Description: </b>
-                    {complaint.complaint.description_user_copy}
+                    {(userType === 'user') ? complaint.complaint.description_user_copy : complaint.complaint.description}
                   </p>
                   <p>
                     <b>Created At: </b>
@@ -71,9 +75,9 @@ const Complaints = ({ userType }) => {
                   </p>
                   <p>
                     <b>Status: </b>
-                    {complaint.complaint.resolved ? 'Resolved' : 'Unresolved'}
+                    {complaint.complaint.resolved ? "Resolved" : "Unresolved"}
                   </p>
-                  {userType === 'officer' && (
+                  {userType === "officer" && (
                     <div className="comment-section">
                       <textarea placeholder="Enter your comment here "></textarea>
                       <button>Submit</button>
