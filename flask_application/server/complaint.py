@@ -34,7 +34,7 @@ def complaint_post():
     complaint = Complaint(description=json.dumps(cipher_text), author_id=user_id, attributes = seperator.join(attributes),description_user_copy = json.dumps(ibe_cipher_text))
     db.session.add(complaint)
     db.session.commit()
-    return "complaint registered", 200
+    return "complaint registered", 201
 
 def deserialize_ciphertext(ciphertext):
     for key in ciphertext['Ci']:
