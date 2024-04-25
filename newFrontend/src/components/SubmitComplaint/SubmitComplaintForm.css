@@ -1,0 +1,17 @@
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 30vw;
+  margin: 4vw 2vw;
+}
+
+.main-form {
+  border-radius: 8px;
+  background-color: rgb(246, 246, 246);
+  box-shadow: 0 6px 9px rgb(191, 192, 192);
+}
+
+.complaint-description {
+  width: 20vw;
+}

@@ -1,0 +1,3 @@
+flask_application/server/__pycache__
+flask_application/instance/db.sqlite
+newFrontend/node_modules

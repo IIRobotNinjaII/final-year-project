@@ -1,0 +1,112 @@
+/* Sign-UpForm.css */
+.main-signup-form-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.signup-form-container {
+  min-width: 20vw;
+  padding: 10px 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.signup-form-container p {
+  color: red; 
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.user-type {
+  background-color: #e6e2e2;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  padding: 2px;
+}
+
+.user-type label {
+  flex: 1;
+  padding: 10px 20px;
+  cursor: pointer; 
+  min-width: 3vw;
+  text-align: center;
+}
+
+.user-type label.user {
+  border-radius: 20px 0 0 20px;
+}
+
+.user-type label.officer {
+  border-radius: 0 20px 20px 0;
+}
+
+.user-type input[type='radio'] {
+  display: none;
+}
+
+.user-type input[type='radio']:checked + label {
+  background-color: white;
+  border-radius: 7px;
+}
+
+.form-group {
+  min-width: 20vw;
+  margin: 10px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  padding: 0 10px;
+}
+
+.form-group input {
+  min-width: 20vw;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
+}
+
+button {
+  min-width: 20vw;
+  margin-top: 10px; 
+  padding: 10px;
+  border-radius: 9px;
+  background-color: #eeecec;
+  color: black;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: none;
+}
+
+button:hover {
+  background-color: #dad6d6;
+}
+
+button:active {
+  box-shadow: 0 2px 4px rgba(200, 200, 200, 1);
+}
+
+.login-link {
+  margin-top: 10px;
+  text-align: center;
+  cursor: pointer;
+  color: black;
+  padding: 10px;
+}
+
+.login-link span {
+  color: #0056b3;
+  text-decoration: underline;
+}
