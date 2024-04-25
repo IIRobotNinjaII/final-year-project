@@ -1,6 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, Blueprint, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from .models import User, UserType, get_user_type, Comment
+from flask import request, Blueprint, jsonify
+from .models import User, UserType, get_user_type
 from . import db
 from .helpers import authorization
 

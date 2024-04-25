@@ -1,11 +1,13 @@
-from flask import  Blueprint,  request, jsonify, session
+from flask import  Blueprint,  request, jsonify,  session
 from flask_login import login_required, current_user
 from .helpers import global_variables,authorization
-from . import db
-from .models import Complaint, Comment, UserType
+from .models import UserType
 import json
 from charm.toolbox.msp import MSP
 from charm.core.math.integer import serialize,deserialize
+import requests
+import uuid
+from datetime import datetime
 
 complaint = Blueprint('complaint', __name__)
 
@@ -31,10 +33,33 @@ def complaint_post():
     for key in cipher_text['Ci']:
         cipher_text['Ci'][key]= global_variables.group.serialize(cipher_text['Ci'][key]).decode('iso-8859-1')
     
-    complaint = Complaint(description=json.dumps(cipher_text), author_id=user_id, attributes = seperator.join(attributes),description_user_copy = json.dumps(ibe_cipher_text))
-    db.session.add(complaint)
-    db.session.commit()
-    return "complaint registered", 200
+    data = {
+        'channelid': 'mychannel',
+        'chaincodeid': 'comment',
+        'function': 'createAsset',
+        'args': [
+            str(uuid.uuid4()),
+            seperator.join(attributes),
+            json.dumps(cipher_text),
+            json.dumps(ibe_cipher_text),
+            str(user_id),
+            datetime.now().isoformat()
+        ]
+    }
+
+    headers = {
+        'content-type': 'application/x-www-form-urlencoded'
+    }
+
+    try:
+        response = requests.post("http://localhost:3000/invoke", data=data, headers=headers)
+        if response.status_code == 200:
+            return "Data sent to other API successfully", 200
+        else:
+            return "Failed to send data to other API", 500
+    except Exception as e:
+        return str(e), 500
+    
 
 def deserialize_ciphertext(ciphertext):
     for key in ciphertext['Ci']:
@@ -52,14 +77,20 @@ def deserialize_ibe_ciphertext(ciphertext):
 @login_required
 @authorization.role_required([UserType.ADMIN.value, UserType.OFFICER.value])
 def complaint_get():
-    all_complaints = Complaint.query.all()
-
+    
+    url = "http://localhost:3000/query?channelid=mychannel&chaincodeid=comment&function=GetAllAssets"
+    headers = {
+    'content-type': 'application/json'
+    }
+    payload={}
+    response = requests.request("GET", url, headers=headers,data=payload)
+    response_json = json.loads(response.text)
     # filtering complaints that user policy allows to decrypt
     user_complaints = []
     mspObj = MSP(global_variables.group)
     user_policy = mspObj.createPolicy(current_user.policy)
-    for complaint in all_complaints:
-        if mspObj.prune(policy=user_policy,attributes=complaint.attributes):
+    for complaint in response_json:
+        if mspObj.prune(policy=user_policy,attributes=complaint["attributes"]):
             user_complaints.append(complaint)
 
     policy_based_user_secret_key = session['secret_key']
@@ -68,18 +99,20 @@ def complaint_get():
 
     response = {"complaints": []}
     for user_complaint in user_complaints:
-        complaint = {}
-        if user_complaint.description_user_copy:
-            user_complaint.description = deserialize_ciphertext(json.loads(user_complaint.description))
-            user_complaint.description = global_variables.kpabe.decrypt(user_complaint.description, policy_based_user_secret_key).decode('utf-8')
-            complaint['complaint'] = user_complaint.json()
-            comments = Comment.query.filter_by(complaint_id=user_complaint.id)
-            complaint["comments"]=[]
+        if user_complaint["description_user_copy"]:
+            
+            user_complaint["description"] = deserialize_ciphertext(json.loads(user_complaint["description"]))
+            user_complaint["description"] = global_variables.kpabe.decrypt(user_complaint["description"], policy_based_user_secret_key).decode('utf-8')
+            
+            payload1={}
+            raw_comment = requests.request("GET", "http://localhost:3000/query?channelid=mychannel&chaincodeid=comments&function=QueryAssetsByComplaintID&args="+str(user_complaint["id"]), headers=headers,data=payload1) 
+            comments = json.loads(raw_comment.text)
+            user_complaint["comments"]=[]
             for comment in comments:
-                comment.comment = deserialize_ciphertext(json.loads(comment.comment))
-                comment.comment = global_variables.kpabe.decrypt(comment.comment, policy_based_user_secret_key).decode('utf-8')
-                complaint["comments"].append(comment.json())
-            response["complaints"].append(complaint)
+                comment["comment"] = deserialize_ciphertext(json.loads(comment["comment"]))
+                comment["comment"] = global_variables.kpabe.decrypt(comment["comment"], policy_based_user_secret_key).decode('utf-8')
+                complaint["comments"].append(comment)
+            response["complaints"].append(user_complaint)
     return jsonify(response)
 
 @complaint.route('/complaint/mycomplaints', methods=['GET'])
@@ -87,7 +120,16 @@ def complaint_get():
 @authorization.role_required([UserType.STUDENT.value])
 def mycomplaint_get():
     user_id = current_user.id
-    user_complaints = Complaint.query.filter_by(author_id=user_id).all()
+    
+    headers = {
+    'content-type': 'application/json'
+    }
+    payload={}
+    raw_user_complaints = requests.request("GET","http://localhost:3000/query?channelid=mychannel&chaincodeid=comment&function=QueryAssetsByAuthorID&args="+str(current_user.id),headers=headers,data=payload)
+    if not raw_user_complaints.text:
+        return "Not Found",404
+    print(type(raw_user_complaints.text))
+    user_complaints = json.loads(raw_user_complaints.text)
     master_secret_key = global_variables.ibe_master_secret_key
     master_public_key = global_variables.ibe_master_public_key
     private_key = global_variables.ibe.extract(master_secret_key, str(user_id))
@@ -95,28 +137,44 @@ def mycomplaint_get():
     response = {"complaints": []}
     for user_complaint in user_complaints:
         complaint = {}
-        if user_complaint.description_user_copy:
-            user_complaint.description_user_copy= deserialize_ibe_ciphertext(user_complaint.description_user_copy)
-            user_complaint.description_user_copy = global_variables.ibe.decrypt(master_public_key, private_key, user_complaint.description_user_copy).decode()
-            complaint['complaint'] = user_complaint.json()
-            comments = Comment.query.filter_by(complaint_id=user_complaint.id)
-            complaint["comments"]=[]
-            for comment in comments:
-                comment.comment_user_copy = deserialize_ibe_ciphertext(comment.comment_user_copy)
-                comment.comment_user_copy = global_variables.ibe.decrypt(master_public_key, private_key, comment.comment_user_copy).decode()
-                complaint["comments"].append(comment.json())
+        if user_complaint["description_user_copy"]:
+            user_complaint["description_user_copy"]= deserialize_ibe_ciphertext((user_complaint["description_user_copy"]))
+            user_complaint["description_user_copy"] = global_variables.ibe.decrypt(master_public_key, private_key, user_complaint["description_user_copy"]).decode()
+            complaint['complaint'] = user_complaint
+            
+            payload1={}
+            raw_comment = requests.request("GET", "http://localhost:3000/query?channelid=mychannel&chaincodeid=comments&function=QueryAssetsByComplaintID&args="+str(user_complaint["id"]), headers=headers,data=payload1) 
+            if raw_comment.text:
+                comments = json.loads(raw_comment.text)
+                
+                complaint["comments"]=[]
+                for comment in comments:
+                    comment["comment_user_copy"] = deserialize_ibe_ciphertext(comment["comment_user_copy"])
+                    comment["comment_user_copy"] = global_variables.ibe.decrypt(master_public_key, private_key, comment["comment_user_copy"]).decode()
+                    complaint["comments"].append(comment)
             response["complaints"].append(complaint)
 
     return jsonify(response)
 
-@complaint.route('/complaint/<int:complaint_id>', methods=['PUT'])
+@complaint.route('/complaint/<complaint_id>', methods=['PUT'])
 @login_required
 @authorization.role_required([UserType.ADMIN.value, UserType.OFFICER.value])
 # also required to have appropriate policy
 def update_complaint(complaint_id):
-    complaint = Complaint.query.get_or_404(complaint_id)
+    url = "http://localhost:3000/query?channelid=mychannel&chaincodeid=comment&function=ReadAsset&args=" + str(complaint_id)
+    headers = {
+    'content-type': 'x-www-form-urlencoded'
+    }
+    payload={}
+    response = requests.request("GET", url, headers=headers,data=payload)
+    print(response.text)
+    if "does not exist" in response.text:
+        return "Complaint not found",404
+    # complaint = Complaint.query.get_or_404(complaint_id)
+    complaint = json.loads(response.text)
     user_id = current_user.id
-    complainant_id = complaint.author_id
+    complainant_id = complaint["author_id"]
+    
     comment = request.get_json().get('comment')
     
     # identity based encryption
@@ -126,12 +184,55 @@ def update_complaint(complaint_id):
     ibe_cipher_text['W']=serialize(ibe_cipher_text['W']).decode('iso-8859-1')
 
     # attribute based encryption
-    cipher_text = global_variables.kpabe.encrypt(global_variables.master_public_key, comment, complaint.attributes.split('#'))
+    cipher_text = global_variables.kpabe.encrypt(global_variables.master_public_key, comment, complaint["attributes"].split('#'))
     for key in cipher_text['Ci']:
         cipher_text['Ci'][key]= global_variables.group.serialize(cipher_text['Ci'][key]).decode('iso-8859-1')
 
-    comment = Comment(comment=json.dumps(cipher_text), author_id=user_id,comment_user_copy = json.dumps(ibe_cipher_text), complaint_id=complaint_id)
-    db.session.add(comment)
-    db.session.commit()
+    data = {
+        'channelid': 'mychannel',
+        'chaincodeid': 'comments',
+        'function': 'createAsset',
+        'args': [
+            str(uuid.uuid4()),
+            json.dumps(cipher_text),
+            json.dumps(ibe_cipher_text),
+            str(complaint_id),
+            str(user_id),
+            datetime.now().isoformat()
+        ]
+    }
+
+    headers = {
+        'content-type': 'application/x-www-form-urlencoded'
+    }
+
+    try:
+        response = requests.post("http://localhost:3000/invoke", data=data, headers=headers)
+        if response.status_code == 200:
+            return "Data sent to other API successfully", 200
+        else:
+            return "Failed to send data to other API", 500
+    except Exception as e:
+        return str(e), 500
     
-    return "commented",200
+@complaint.route('/resolve-complaint/<complaint_id>', methods=['PUT'])
+@login_required
+@authorization.role_required([UserType.ADMIN.value, UserType.OFFICER.value])
+# also required to have appropriate policy
+def resolve_complaint(complaint_id):
+    
+    
+    url = "http://localhost:3000/invoke"
+
+    payload = '=&channelid=mychannel&chaincodeid=comment&function=UpdateAsset&args='+ str(complaint_id)
+    headers = {
+    'content-type': 'application/x-www-form-urlencoded'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    if not "Transaction ID " in response.text:
+        return "Complaint not found",404
+    else: 
+        return "Complaint Resolved",200
+    

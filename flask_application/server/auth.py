@@ -1,12 +1,12 @@
 # auth.py
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, Response, session
+from flask import Blueprint, request, jsonify,  session
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user
 from .models import User, UserType
 from . import db
-from .helpers import crypto, global_variables
-import base64
+from .helpers import  global_variables
+
 # import json
 
 auth = Blueprint('auth', __name__)
