@@ -51,21 +51,21 @@ const SubmitComplaintForm = () => {
           <div className="radio-buttons">
             <input
               type="radio"
-              id="category-accounting"
+              id="category-residential"
               className="form-check-input"
               name="category"
-              value="Accounting"
+              value="residential"
               onChange={handleChange}
               checked={body.category === 'Accounting'}
             />
-            <label htmlFor="category-accounting">Accounting</label>
+            <label htmlFor="category-residential">Residential</label>
 
             <input
               type="radio"
               id="category-academic"
               className="form-check-input"
               name="category"
-              value="Academic"
+              value="academic"
               onChange={handleChange}
               checked={body.category === 'Academic'}
             />
@@ -73,14 +73,14 @@ const SubmitComplaintForm = () => {
 
             <input
               type="radio"
-              id="category-hostel"
+              id="category-account"
               className="form-check-input"
               name="category"
-              value="Hostel"
+              value="account"
               onChange={handleChange}
-              checked={body.category === 'Hostel'}
+              checked={body.category === 'account'}
             />
-            <label htmlFor="category-hostel">Hostel</label>
+            <label htmlFor="category-account">Account</label>
           </div>
         </div>
 

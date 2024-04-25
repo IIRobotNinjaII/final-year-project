@@ -106,12 +106,13 @@ def complaint_get():
             
             payload1={}
             raw_comment = requests.request("GET", "http://localhost:3000/query?channelid=mychannel&chaincodeid=comments&function=QueryAssetsByComplaintID&args="+str(user_complaint["id"]), headers=headers,data=payload1) 
-            comments = json.loads(raw_comment.text)
             user_complaint["comments"]=[]
-            for comment in comments:
-                comment["comment"] = deserialize_ciphertext(json.loads(comment["comment"]))
-                comment["comment"] = global_variables.kpabe.decrypt(comment["comment"], policy_based_user_secret_key).decode('utf-8')
-                complaint["comments"].append(comment)
+            if raw_comment.text:
+                comments = json.loads(raw_comment.text)
+                for comment in comments:
+                    comment["comment"] = deserialize_ciphertext(json.loads(comment["comment"]))
+                    comment["comment"] = global_variables.kpabe.decrypt(comment["comment"], policy_based_user_secret_key).decode('utf-8')
+                    user_complaint["comments"].append(comment)
             response["complaints"].append(user_complaint)
     return jsonify(response)
 

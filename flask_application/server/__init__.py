@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-from flask import Flask
-=======
 from flask import Flask, session
 from flask_cors import CORS
->>>>>>> 61e48407ab3249768ae1465fa542a1db71deee32
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager 
 from .helpers import crypto, global_variables, ibe_crypto
