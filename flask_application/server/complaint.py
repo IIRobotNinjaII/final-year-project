@@ -35,7 +35,7 @@ def complaint_post():
     
     data = {
         'channelid': 'mychannel',
-        'chaincodeid': 'comment',
+        'chaincodeid': 'complaint',
         'function': 'createAsset',
         'args': [
             str(uuid.uuid4()),
@@ -78,7 +78,7 @@ def deserialize_ibe_ciphertext(ciphertext):
 @authorization.role_required([UserType.ADMIN.value, UserType.OFFICER.value])
 def complaint_get():
     
-    url = "http://localhost:3000/query?channelid=mychannel&chaincodeid=comment&function=GetAllAssets"
+    url = "http://localhost:3000/query?channelid=mychannel&chaincodeid=complaint&function=GetAllAssets"
     headers = {
     'content-type': 'application/json'
     }
@@ -105,7 +105,7 @@ def complaint_get():
             user_complaint["description"] = global_variables.kpabe.decrypt(user_complaint["description"], policy_based_user_secret_key).decode('utf-8')
             
             payload1={}
-            raw_comment = requests.request("GET", "http://localhost:3000/query?channelid=mychannel&chaincodeid=comments&function=QueryAssetsByComplaintID&args="+str(user_complaint["id"]), headers=headers,data=payload1) 
+            raw_comment = requests.request("GET", "http://localhost:3000/query?channelid=mychannel&chaincodeid=comment&function=QueryAssetsByComplaintID&args="+str(user_complaint["id"]), headers=headers,data=payload1) 
             user_complaint["comments"]=[]
             if raw_comment.text:
                 comments = json.loads(raw_comment.text)
@@ -126,7 +126,7 @@ def mycomplaint_get():
     'content-type': 'application/json'
     }
     payload={}
-    raw_user_complaints = requests.request("GET","http://localhost:3000/query?channelid=mychannel&chaincodeid=comment&function=QueryAssetsByAuthorID&args="+str(current_user.id),headers=headers,data=payload)
+    raw_user_complaints = requests.request("GET","http://localhost:3000/query?channelid=mychannel&chaincodeid=complaint&function=QueryAssetsByAuthorID&args="+str(current_user.id),headers=headers,data=payload)
     if not raw_user_complaints.text:
         return "Not Found",404
     print(type(raw_user_complaints.text))
@@ -144,7 +144,7 @@ def mycomplaint_get():
             complaint['complaint'] = user_complaint
             
             payload1={}
-            raw_comment = requests.request("GET", "http://localhost:3000/query?channelid=mychannel&chaincodeid=comments&function=QueryAssetsByComplaintID&args="+str(user_complaint["id"]), headers=headers,data=payload1) 
+            raw_comment = requests.request("GET", "http://localhost:3000/query?channelid=mychannel&chaincodeid=comment&function=QueryAssetsByComplaintID&args="+str(user_complaint["id"]), headers=headers,data=payload1) 
             if raw_comment.text:
                 comments = json.loads(raw_comment.text)
                 
@@ -162,7 +162,7 @@ def mycomplaint_get():
 @authorization.role_required([UserType.ADMIN.value, UserType.OFFICER.value])
 # also required to have appropriate policy
 def update_complaint(complaint_id):
-    url = "http://localhost:3000/query?channelid=mychannel&chaincodeid=comment&function=ReadAsset&args=" + str(complaint_id)
+    url = "http://localhost:3000/query?channelid=mychannel&chaincodeid=complaint&function=ReadAsset&args=" + str(complaint_id)
     headers = {
     'content-type': 'x-www-form-urlencoded'
     }
@@ -191,7 +191,7 @@ def update_complaint(complaint_id):
 
     data = {
         'channelid': 'mychannel',
-        'chaincodeid': 'comments',
+        'chaincodeid': 'comment',
         'function': 'createAsset',
         'args': [
             str(uuid.uuid4()),
@@ -225,7 +225,7 @@ def resolve_complaint(complaint_id):
     
     url = "http://localhost:3000/invoke"
 
-    payload = '=&channelid=mychannel&chaincodeid=comment&function=UpdateAsset&args='+ str(complaint_id)
+    payload = '=&channelid=mychannel&chaincodeid=complaint&function=UpdateAsset&args='+ str(complaint_id) + "&args=" + str(current_user.id)
     headers = {
     'content-type': 'application/x-www-form-urlencoded'
     }
