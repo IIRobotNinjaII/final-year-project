@@ -29,7 +29,7 @@ def complaint_post():
 
     # attribute based encryption
     # ComplaintType(request.json['complaint type']).name
-    
+
     attributes = [] #determine attributes dynamically
     if category == 'residential':
         attributes.append(current_user.residence.name) 
@@ -111,6 +111,7 @@ def complaint_get():
 
     response = {"complaints": []}
     for user_complaint in user_complaints:
+        user_complaint["attributes"] = user_complaint["attributes"].split('#')
         if user_complaint["description_user_copy"]:      
             user_complaint["description"] = deserialize_ciphertext(json.loads(user_complaint["description"]))
             user_complaint["description"] = global_variables.kpabe.decrypt(user_complaint["description"], policy_based_user_secret_key).decode('utf-8')
@@ -125,7 +126,19 @@ def complaint_get():
                     comment["comment"] = global_variables.kpabe.decrypt(comment["comment"], policy_based_user_secret_key).decode('utf-8')
                     user_complaint["comments"].append(comment)
             response["complaints"].append(user_complaint)
-    return jsonify(response)
+    
+    grouped_complaints = {}
+    for complaint in user_complaints:
+        attributes = '|'.join(sorted(complaint['attributes']))
+        if attributes not in grouped_complaints:
+            grouped_complaints[attributes] = []
+        grouped_complaints[attributes].append(complaint)
+    
+    for attributes, complaints in grouped_complaints.items():
+        complaints.sort(key=lambda x: x['created_at'], reverse=True)
+    
+    # print(grouped_complaints)
+    return jsonify(grouped_complaints)
 
 @complaint.route('/complaint/mycomplaints', methods=['GET'])
 @login_required
@@ -165,7 +178,7 @@ def mycomplaint_get():
                     comment["comment_user_copy"] = global_variables.ibe.decrypt(master_public_key, private_key, comment["comment_user_copy"]).decode()
                     complaint["comments"].append(comment)
             response["complaints"].append(complaint)
-
+    response["complaints"] = sorted(response["complaints"], key=lambda x: x['complaint']['created_at'], reverse=True)
     return jsonify(response)
 
 @complaint.route('/complaint/<complaint_id>', methods=['PUT'])
