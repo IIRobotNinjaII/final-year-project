@@ -84,7 +84,32 @@ def deserialize_ibe_ciphertext(ciphertext):
     ciphertext['V']=deserialize(ciphertext['V'].encode('iso-8859-1'))
     ciphertext['W']=deserialize(ciphertext['W'].encode('iso-8859-1'))
     return ciphertext
-        
+
+def sortComplaints(response_dict):
+    resolved_grouped_complaints = {}
+    unresolved_grouped_complaints = {}
+    for complaint in response_dict['complaints']:
+        # print(complaint)
+        if complaint['resolved']:
+            group_dict = resolved_grouped_complaints
+        else:
+            group_dict = unresolved_grouped_complaints
+
+        attributes = '|'.join(sorted(complaint['attributes']))
+        if attributes not in group_dict:
+            group_dict[attributes] = []
+        group_dict[attributes].append(complaint)
+
+    for group_dict in [resolved_grouped_complaints, unresolved_grouped_complaints]:
+        for complaints in group_dict.values():
+            complaints.sort(key=lambda x: x['created_at'], reverse=True)
+    
+    sorted_response={}
+    sorted_response["resolved"]=resolved_grouped_complaints
+    sorted_response["unresolved"]=unresolved_grouped_complaints
+
+    return sorted_response
+
 @complaint.route('/complaint/view', methods=['GET'])
 @login_required
 @authorization.role_required([UserType.ADMIN, UserType.OFFICER])
@@ -97,6 +122,7 @@ def complaint_get():
     payload={}
     response = requests.request("GET", url, headers=headers,data=payload)
     response_json = json.loads(response.text)
+    
     # filtering complaints that user policy allows to decrypt
     user_complaints = []
     mspObj = MSP(global_variables.group)
@@ -126,19 +152,9 @@ def complaint_get():
                     comment["comment"] = global_variables.kpabe.decrypt(comment["comment"], policy_based_user_secret_key).decode('utf-8')
                     user_complaint["comments"].append(comment)
             response["complaints"].append(user_complaint)
-    
-    grouped_complaints = {}
-    for complaint in user_complaints:
-        attributes = '|'.join(sorted(complaint['attributes']))
-        if attributes not in grouped_complaints:
-            grouped_complaints[attributes] = []
-        grouped_complaints[attributes].append(complaint)
-    
-    for attributes, complaints in grouped_complaints.items():
-        complaints.sort(key=lambda x: x['created_at'], reverse=True)
-    
-    # print(grouped_complaints)
-    return jsonify(grouped_complaints)
+
+    # return jsonify(sortComplaints(response))
+    return jsonify(response)
 
 @complaint.route('/complaint/mycomplaints', methods=['GET'])
 @login_required
@@ -153,7 +169,7 @@ def mycomplaint_get():
     raw_user_complaints = requests.request("GET","http://localhost:3000/query?channelid=mychannel&chaincodeid=complaint&function=QueryAssetsByAuthorID&args="+str(current_user.id),headers=headers,data=payload)
     if not raw_user_complaints.text:
         return "Not Found",404
-    print(type(raw_user_complaints.text))
+        
     user_complaints = json.loads(raw_user_complaints.text)
     master_secret_key = global_variables.ibe_master_secret_key
     master_public_key = global_variables.ibe_master_public_key
@@ -162,10 +178,11 @@ def mycomplaint_get():
     response = {"complaints": []}
     for user_complaint in user_complaints:
         complaint = {}
+        user_complaint["attributes"] = user_complaint["attributes"].split('#')
         if user_complaint["description_user_copy"]:
             user_complaint["description_user_copy"]= deserialize_ibe_ciphertext((user_complaint["description_user_copy"]))
             user_complaint["description_user_copy"] = global_variables.ibe.decrypt(master_public_key, private_key, user_complaint["description_user_copy"]).decode()
-            complaint['complaint'] = user_complaint
+            complaint = user_complaint
             
             payload1={}
             raw_comment = requests.request("GET", "http://localhost:3000/query?channelid=mychannel&chaincodeid=comment&function=QueryAssetsByComplaintID&args="+str(user_complaint["id"]), headers=headers,data=payload1) 
@@ -178,7 +195,9 @@ def mycomplaint_get():
                     comment["comment_user_copy"] = global_variables.ibe.decrypt(master_public_key, private_key, comment["comment_user_copy"]).decode()
                     complaint["comments"].append(comment)
             response["complaints"].append(complaint)
-    response["complaints"] = sorted(response["complaints"], key=lambda x: x['complaint']['created_at'], reverse=True)
+    # response["complaints"] = sorted(response["complaints"], key=lambda x: x['complaint']['created_at'], reverse=True)
+    # print(response)
+    return jsonify(sortComplaints(response))
     return jsonify(response)
 
 @complaint.route('/complaint/<complaint_id>', methods=['PUT'])
@@ -243,10 +262,24 @@ def update_complaint(complaint_id):
 @complaint.route('/resolve-complaint/<complaint_id>', methods=['PUT'])
 @login_required
 @authorization.role_required([UserType.ADMIN, UserType.OFFICER])
-# also required to have appropriate policy
 def resolve_complaint(complaint_id):
-    
-    
+
+    # get complaint
+    url = f"http://localhost:3000/query?channelid=mychannel&chaincodeid=complaint&function=ReadAsset&args={complaint_id}"
+    payload = {}
+    headers = {
+    'content-type': 'application/x-www-form-urlencoded'
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+    complaint = json.loads(response.text)
+
+    # check policy policy
+    mspObj = MSP(global_variables.group)
+    user_policy = mspObj.createPolicy(current_user.policy)
+    if not mspObj.prune(policy=user_policy,attributes=complaint["attributes"]):
+        return "Unauthorized", 401
+
     url = "http://localhost:3000/invoke"
 
     payload = '=&channelid=mychannel&chaincodeid=complaint&function=UpdateAsset&args='+ str(complaint_id) + "&args=" + str(current_user.id)
