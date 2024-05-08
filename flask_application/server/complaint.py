@@ -1,7 +1,8 @@
 from flask import  Blueprint,  request, jsonify,  session
 from flask_login import login_required, current_user
 from .helpers import global_variables,authorization
-from .models import UserType
+from .enums import UserType, ComplaintType, Department, Residence, AccountComplaintType
+from .models import get_user_email
 import json
 from charm.toolbox.msp import MSP
 from charm.core.math.integer import serialize,deserialize
@@ -13,11 +14,11 @@ complaint = Blueprint('complaint', __name__)
 
 @complaint.route('/complaint/file', methods=['POST'])
 @login_required
-@authorization.role_required([UserType.STUDENT.value])
+@authorization.role_required([UserType.STUDENT])
 def complaint_post():
     data = request.get_json()
     description = data.get('text')
-    category = data.get('category')
+    category = data.get('complaint type')
     user_id = current_user.id  
 
     # identity based encryption
@@ -27,12 +28,23 @@ def complaint_post():
     ibe_cipher_text['W']=serialize(ibe_cipher_text['W']).decode('iso-8859-1')
 
     # attribute based encryption
-    attributes = [global_variables.category_attribute[category] ] #determine attributes dynamically
+    # ComplaintType(request.json['complaint type']).name
+    
+    attributes = [] #determine attributes dynamically
+    if category == 'residential':
+        attributes.append(current_user.residence.name) 
+    if category == 'account':
+        attributes.append(AccountComplaintType(data.get('account complaint type')).name) 
+    if category == 'academic':
+        attributes.append(current_user.department.name)
+    
     seperator = '#'
     cipher_text = global_variables.kpabe.encrypt(global_variables.master_public_key, description, attributes)
     for key in cipher_text['Ci']:
         cipher_text['Ci'][key]= global_variables.group.serialize(cipher_text['Ci'][key]).decode('iso-8859-1')
     
+    # print(cipher_text)
+
     data = {
         'channelid': 'mychannel',
         'chaincodeid': 'complaint',
@@ -75,7 +87,7 @@ def deserialize_ibe_ciphertext(ciphertext):
         
 @complaint.route('/complaint/view', methods=['GET'])
 @login_required
-@authorization.role_required([UserType.ADMIN.value, UserType.OFFICER.value])
+@authorization.role_required([UserType.ADMIN, UserType.OFFICER])
 def complaint_get():
     
     url = "http://localhost:3000/query?channelid=mychannel&chaincodeid=complaint&function=GetAllAssets"
@@ -99,8 +111,7 @@ def complaint_get():
 
     response = {"complaints": []}
     for user_complaint in user_complaints:
-        if user_complaint["description_user_copy"]:
-            
+        if user_complaint["description_user_copy"]:      
             user_complaint["description"] = deserialize_ciphertext(json.loads(user_complaint["description"]))
             user_complaint["description"] = global_variables.kpabe.decrypt(user_complaint["description"], policy_based_user_secret_key).decode('utf-8')
             
@@ -118,7 +129,7 @@ def complaint_get():
 
 @complaint.route('/complaint/mycomplaints', methods=['GET'])
 @login_required
-@authorization.role_required([UserType.STUDENT.value])
+@authorization.role_required([UserType.STUDENT])
 def mycomplaint_get():
     user_id = current_user.id
     
@@ -159,7 +170,7 @@ def mycomplaint_get():
 
 @complaint.route('/complaint/<complaint_id>', methods=['PUT'])
 @login_required
-@authorization.role_required([UserType.ADMIN.value, UserType.OFFICER.value])
+@authorization.role_required([UserType.ADMIN, UserType.OFFICER])
 # also required to have appropriate policy
 def update_complaint(complaint_id):
     url = "http://localhost:3000/query?channelid=mychannel&chaincodeid=complaint&function=ReadAsset&args=" + str(complaint_id)
@@ -218,7 +229,7 @@ def update_complaint(complaint_id):
     
 @complaint.route('/resolve-complaint/<complaint_id>', methods=['PUT'])
 @login_required
-@authorization.role_required([UserType.ADMIN.value, UserType.OFFICER.value])
+@authorization.role_required([UserType.ADMIN, UserType.OFFICER])
 # also required to have appropriate policy
 def resolve_complaint(complaint_id):
     

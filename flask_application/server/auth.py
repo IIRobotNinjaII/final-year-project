@@ -3,7 +3,7 @@
 from flask import Blueprint, request, jsonify,  session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user
-from .models import User, UserType
+from .models import User, UserType, Department, Residence
 from . import db
 from .helpers import  global_variables
 
@@ -63,14 +63,16 @@ def signup_user():
     email = request.json['email']
     name = request.json['name']
     password = request.json['password']
-    policy = 'STUDENT' # default policy for students 
+    department = Department(request.json['department'])
+    residence = Residence(request.json['residence'])
     usertype = UserType.STUDENT
+    policy = f"({residence.value} or {department.value})"
 
     user = User.query.filter_by(email=email).first() 
     if user: # Email already exists in database
         return jsonify({'error': 'Email already exists'}), 409
 
-    new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'),policy=policy, usertype=usertype)
+    new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'),policy=policy, usertype=usertype, department=department, residence=residence)
 
     # add the new user to the database
     db.session.add(new_user)
@@ -88,12 +90,14 @@ def signup_officer():
     password = request.json['password']
     policy = ''
     usertype = UserType.UNAPPROVED_OFFICER
+    department = Department.NOTAPPLICABLE
+    residence = Residence.NOTAPPLICABLE
 
     user = User.query.filter_by(email=email).first() 
     if user: # Email already exists in database
         return jsonify({'error': 'Email already exists'}), 409
 
-    new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'),policy=policy, usertype=usertype)
+    new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'),policy=policy, usertype=usertype, department=department, residence=residence)
 
     # add the new user to the database
     db.session.add(new_user)

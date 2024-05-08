@@ -4,7 +4,6 @@ kpabe = None
 kpabe_secret_key = None
 kpabe_group = None
 kpabe_seed = 50
-category_attribute = {'account':'ACCOUNT', 'residential':'RESIDENTIAL', 'academic':'ACADEMIC'}
 
 ibe = None
 ibe_group = None

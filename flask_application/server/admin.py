@@ -16,7 +16,7 @@ def approve_user(user_id):
     return jsonify({'message':f'User {user.id} has been approved.'})
 
 # Admin route to view pending users
-@admin.route('/admin/unapprovedofficers')
+@admin.route('/admin/users',methods=['GET'])
 @authorization.role_required([UserType.ADMIN])
 def unapproved_officers():
     unapproved_officers = User.query.filter_by(usertype=UserType.UNAPPROVED_OFFICER).all()
