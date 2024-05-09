@@ -95,7 +95,7 @@ def signup_officer():
     if user: # Email already exists in database
         return jsonify({'error': 'Email already exists'}), 409
 
-    new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'),policy=policy, usertype=usertype, department=department, residence=residence)
+    new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'),policy=policy, usertype=usertype)
 
     # add the new user to the database
     db.session.add(new_user)
