@@ -90,8 +90,6 @@ def signup_officer():
     password = request.json['password']
     policy = ''
     usertype = UserType.UNAPPROVED_OFFICER
-    department = Department.NOTAPPLICABLE
-    residence = Residence.NOTAPPLICABLE
 
     user = User.query.filter_by(email=email).first() 
     if user: # Email already exists in database
