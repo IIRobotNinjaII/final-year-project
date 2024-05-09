@@ -206,17 +206,25 @@ def mycomplaint_get():
 @authorization.role_required([UserType.ADMIN, UserType.OFFICER])
 # also required to have appropriate policy
 def update_complaint(complaint_id):
+
+    # get complaint
     url = "http://localhost:3000/query?channelid=mychannel&chaincodeid=complaint&function=ReadAsset&args=" + str(complaint_id)
     headers = {
     'content-type': 'x-www-form-urlencoded'
     }
     payload={}
     response = requests.request("GET", url, headers=headers,data=payload)
-    print(response.text)
     if "does not exist" in response.text:
         return "Complaint not found",404
-    # complaint = Complaint.query.get_or_404(complaint_id)
     complaint = json.loads(response.text)
+
+    # check policy policy
+    mspObj = MSP(global_variables.group)
+    user_policy = mspObj.createPolicy(current_user.policy)
+    print(mspObj.prune(policy=user_policy,attributes=complaint["attributes"]))
+    if not mspObj.prune(policy=user_policy,attributes=complaint["attributes"]):
+        return "Unauthorized", 401
+        
     user_id = current_user.id
     complainant_id = complaint["author_id"]
     
@@ -278,6 +286,7 @@ def resolve_complaint(complaint_id):
     # check policy policy
     mspObj = MSP(global_variables.group)
     user_policy = mspObj.createPolicy(current_user.policy)
+    print(mspObj.prune(policy=user_policy,attributes=complaint["attributes"]))
     if not mspObj.prune(policy=user_policy,attributes=complaint["attributes"]):
         return "Unauthorized", 401
 
