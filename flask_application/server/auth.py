@@ -66,7 +66,7 @@ def signup_user():
     department = Department(request.json['department'])
     residence = Residence(request.json['residence'])
     usertype = UserType.STUDENT
-    policy = f"({residence.value} or {department.value})"
+    policy = f"({residence.name} or {department.name})"
 
     user = User.query.filter_by(email=email).first() 
     if user: # Email already exists in database
