@@ -18,10 +18,17 @@ def approve_user(user_id):
 # Admin route to view pending users
 @admin.route('/admin/users',methods=['GET'])
 @authorization.role_required([UserType.ADMIN])
-def unapproved_officers():
-    unapproved_officers = User.query.filter_by(usertype=UserType.UNAPPROVED_OFFICER).all()
-    unapproved_officers = [unapproved_officer.json() for unapproved_officer in unapproved_officers]
-    return jsonify(unapproved_officers)
+def officers():
+    officers = User.query.filter_by().all()
+    officers = [officer.json() for officer in officers]
+    grouped_data = {}
+    for officer in officers:
+        usertype = officer['usertype']
+        if usertype not in grouped_data:
+            grouped_data[usertype] = []
+        grouped_data[usertype].append(officer)
+        
+    return jsonify(grouped_data)
 
 @admin.route('/admin/test', methods=['POST'])
 def test():

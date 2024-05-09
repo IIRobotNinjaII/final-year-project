@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager 
 from .helpers import crypto, global_variables, ibe_crypto
 from flask_migrate import Migrate
-from .enums import ComplaintType, Department, Residence, AccountComplaintType
+from .enums import ComplaintType, Department, Residence, AccountComplaintType, ResidentialComplaintType
 
 
 # init SQLAlchemy so we can use it later in our models
@@ -37,6 +37,7 @@ def create_app():
     attributes = [attribute.value.upper() for attribute in Residence]
     attributes.extend([attribute.value.upper() for attribute in Department])
     attributes.extend([attribute.value.upper() for attribute in AccountComplaintType])
+    attributes.extend([attribute.value.upper() for attribute in ResidentialComplaintType])
 
     (global_variables.group, global_variables.kpabe, global_variables.master_public_key, global_variables.master_key) = crypto.initialize(attributes,50)
     (global_variables.ibe_group, global_variables.ibe, global_variables.ibe_master_public_key, global_variables.ibe_master_secret_key) = ibe_crypto.initialize(global_variables.ibe_master_public_key, global_variables.ibe_master_secret_key)

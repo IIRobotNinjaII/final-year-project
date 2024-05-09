@@ -1,7 +1,7 @@
 from flask import  Blueprint,  request, jsonify,  session
 from flask_login import login_required, current_user
 from .helpers import global_variables,authorization
-from .enums import UserType, ComplaintType, Department, Residence, AccountComplaintType
+from .enums import UserType, ComplaintType, Department, Residence, AccountComplaintType, ResidentialComplaintType
 from .models import get_user_email
 import json
 from charm.toolbox.msp import MSP
@@ -33,6 +33,7 @@ def complaint_post():
     attributes = [] #determine attributes dynamically
     if category == 'residential':
         attributes.append(current_user.residence.name) 
+        attributes.append(ResidentialComplaintType(data.get('residential complaint type')).name) 
     if category == 'account':
         attributes.append(AccountComplaintType(data.get('account complaint type')).name) 
     if category == 'academic':
@@ -153,8 +154,8 @@ def complaint_get():
                     user_complaint["comments"].append(comment)
             response["complaints"].append(user_complaint)
 
-    # return jsonify(sortComplaints(response))
-    return jsonify(response)
+    return jsonify(sortComplaints(response))
+    # return jsonify(response)
 
 @complaint.route('/complaint/mycomplaints', methods=['GET'])
 @login_required

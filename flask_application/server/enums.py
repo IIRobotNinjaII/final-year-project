@@ -38,3 +38,8 @@ class Department(Enum):
 class AccountComplaintType(Enum):
     DUE = "due"
     REFUND = "refund"
+
+class ResidentialComplaintType(Enum):
+    ELECTRIC = "electric"
+    PLUMBING = "plumbing"
+    NETWORK = "network"
