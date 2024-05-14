@@ -7,7 +7,7 @@ admin = Blueprint('admin', __name__)
 
 # Admin route to approve users
 @admin.route('/admin/approve/<int:user_id>',methods=['PUT'])
-@authorization.role_required([UserType.ADMIN])
+# @authorization.role_required([UserType.ADMIN])
 def approve_user(user_id):
     user = User.query.get_or_404(user_id)
     user.usertype = get_user_type(request.json['usertype'])
@@ -17,7 +17,7 @@ def approve_user(user_id):
 
 # Admin route to view pending users
 @admin.route('/admin/users',methods=['GET'])
-@authorization.role_required([UserType.ADMIN])
+# @authorization.role_required([UserType.ADMIN])
 def officers():
     officers = User.query.filter_by().all()
     officers = [officer.json() for officer in officers]

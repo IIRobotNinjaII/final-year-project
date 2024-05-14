@@ -24,6 +24,7 @@ def login_users():
 
     # set secret key according to policy
     policy = user.policy
+    print(policy)
     policy_based_user_secret_key = global_variables.kpabe.keygen(global_variables.master_public_key, global_variables.master_key, policy)
     for key in policy_based_user_secret_key['Du']:
         policy_based_user_secret_key['Du'][key]=global_variables.group.serialize(policy_based_user_secret_key['Du'][key]).decode('iso-8859-1')

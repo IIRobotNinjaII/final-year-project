@@ -1,91 +1,114 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import './SubmitComplaintForm.css';
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from 'react-router-dom';
+import "./SubmitComplaintForm.css";
 
-const SubmitComplaintForm = () => {
-  const [body, setBody] = useState({});
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setBody({
-      ...body,
-      [name]: value,
-    });
-  };
+const SubmitComplaintForm = ({fetchData}) => {
+  const [text, setText] = useState("");
+  const [category, setCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/complaint/file', body, { withCredentials: true });
-      if (response.status !== 201) {
-        throw new Error('Failed to submit complaint');
-      }
-      setBody({});
-      alert('Complaint submitted successfully!');
+      const url = "http://localhost:8081/complaint/file";
+
+      const body = {
+        text,
+        "complaint type": category,
+      };
+
+      if(category === 'account')
+        body[`${category} complaint type`] = subCategory;
+      else if(category === 'residential')
+        body[`${category} complaint type`] = subCategory;
+
+      const response = await axios.post(
+        url,
+        body,
+        { withCredentials: true }
+      );
+
+      // if (response.status !== 201) {
+      //   console.log(response);
+      //   throw new Error('Request Unsuccessful!!');
+      // }
+
+      setText('');
+      setCategory('');
+      setSubCategory('');
+      navigate('/complaints');
+      alert('Complaint Filed!');
+      await fetchData();
     } catch (error) {
-      console.error('Error submitting complaint:', error);
-      alert('Failed to submit complaint. Please try again later.');
+      alert(error);
+      console.log(error);
     }
   };
 
   return (
     <div className="form-container">
-      <h1>Submit New Complaint</h1>
+      <h1 className="submit-form-heading">Submit New Complaint</h1>
       <form onSubmit={handleSubmit} className="main-form">
-        <div className="form-group">
+        <div className="sc-form-group">
+
+          <div>
+            <select
+              value={category}
+              onChange={(e) => {setCategory(e.target.value); setSubCategory('')}}
+              className="category-select"
+              required
+            >
+              <option value="" selected disabled >Choose Your Category</option>
+              <option value="account">Account</option>
+              <option value="academic">Academic</option>
+              <option value="residential">Residential</option>
+            </select>
+          </div>
+          {category === 'account' ? (
+            <select
+              value={subCategory}
+              onChange={(e) => setSubCategory(e.target.value)}
+              className="category-select"
+              style={{ marginTop: '10px' }}
+              required
+            >
+              <option value="" selected disabled >Select Dues/Refund</option>
+              <option value="due">Due</option>
+              <option value="refund">Refund</option>
+            </select>
+          ) : category === 'residential' ? (
+            <select
+              value={subCategory}
+              onChange={(e) => setSubCategory(e.target.value)}
+              className="category-select"
+              style={{ marginTop: '10px' }}
+              required
+            >
+              <option value="" selected disabled>Select type of issue</option>
+              <option value="electric">Electrical</option>
+              <option value="plumbing">Plumbing</option>
+              <option value="network">Network</option>
+            </select>
+          ) : null}
+        </div>
+        <div className="sc-form-group">
           {/* Complaint Description */}
           <textarea
-            id="complaint-description"
-            className="complaint-description"
+            id="text"
+            className="complaint-text"
             name="text"
-            value={body.text}
-            onChange={handleChange}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
             placeholder="Complaint Description"
             required
           />
-        </div>
-
-        <div className="form-group">
-          {/* Category Selection */}
-          <label>Category</label>
-          <div className="radio-buttons">
-            <input
-              type="radio"
-              id="category-residential"
-              className="form-check-input"
-              name="category"
-              value="residential"
-              onChange={handleChange}
-              checked={body.category === 'Accounting'}
-            />
-            <label htmlFor="category-residential">Residential</label>
-
-            <input
-              type="radio"
-              id="category-academic"
-              className="form-check-input"
-              name="category"
-              value="academic"
-              onChange={handleChange}
-              checked={body.category === 'Academic'}
-            />
-            <label htmlFor="category-academic">Academic</label>
-
-            <input
-              type="radio"
-              id="category-account"
-              className="form-check-input"
-              name="category"
-              value="account"
-              onChange={handleChange}
-              checked={body.category === 'account'}
-            />
-            <label htmlFor="category-account">Account</label>
-          </div>
+          <label htmlFor="text" />
         </div>
 
         {/* Submit Button */}
-        <button type="submit" className="btn btn-primary submit-button">
+        <button type="submit" className="submit-form-button">
           Submit Complaint
         </button>
       </form>

@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Login.css';
 
-const Login = ({ setIsLoggedIn, setSessionUserType }) => {
+const Login = ({ setIsLoggedIn, setSessionUserType, setUserDetails }) => {
   const [userType, setUserType] = useState('user');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,7 +16,7 @@ const Login = ({ setIsLoggedIn, setSessionUserType }) => {
     try {
 
       const response = await axios.post(
-        `http://localhost:8080/login/${userType}`,
+        `http://localhost:8081/login/${userType}`,
         { email, password },
         { withCredentials: true }
       );
@@ -26,6 +26,7 @@ const Login = ({ setIsLoggedIn, setSessionUserType }) => {
       } else {
         setIsLoggedIn(true);
         setSessionUserType(userType);
+        if (userType === 'admin' || userType === 'officer') setUserDetails(response.data);
         navigate('/complaints');
       }
     } catch (error) {
@@ -99,4 +100,4 @@ const Login = ({ setIsLoggedIn, setSessionUserType }) => {
   );
 };
 
-export default Login;
+export default Login; 

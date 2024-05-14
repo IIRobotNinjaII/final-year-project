@@ -2,16 +2,82 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 30vw;
+  min-width: 25vw;
   margin: 4vw 2vw;
 }
 
+.submit-form-heading {
+  display: flex;
+  margin: 2vh 0;
+  flex-direction: row;
+  min-width: 25vw;
+  justify-content: space-around;
+  color: black;
+}
+
 .main-form {
-  border-radius: 8px;
+  padding: 1vw;
   background-color: rgb(246, 246, 246);
   box-shadow: 0 6px 9px rgb(191, 192, 192);
 }
 
-.complaint-description {
-  width: 20vw;
+.sc-form-group {
+  padding: 5px;
+  border-radius: 8px;
 }
+
+.complaint-text {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid rgb(220, 220, 220);
+  border-radius: 7px;
+  resize: none;
+  font-size: 16px;
+  height: 20vh;
+}
+
+.radio-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  border-radius: 10px;
+  height: 3vh;
+  padding: 5px  ;
+  background-color: #e6e2e2; 
+}
+
+.radio-buttons input[type='radio'] {
+  display: none;
+}
+
+.radio-buttons residential:checked .category-selected {
+  background-color: black;
+}
+
+
+
+.container {
+  display: flex;
+  align-items: center;
+  width: 300px; /* Adjust as needed */
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.label {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.category-select {
+  flex: 2;
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+
+

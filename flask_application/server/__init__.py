@@ -35,7 +35,7 @@ def create_app():
         return models.User.query.get(int(user_id))
 
     attributes = [attribute.value.upper() for attribute in Residence]
-    attributes.extend([attribute.value.upper() for attribute in Department])
+    attributes.extend([attribute.name for attribute in Department])
     attributes.extend([attribute.value.upper() for attribute in AccountComplaintType])
     attributes.extend([attribute.value.upper() for attribute in ResidentialComplaintType])
 

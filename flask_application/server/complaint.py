@@ -264,14 +264,12 @@ def update_complaint(complaint_id):
 @login_required
 @authorization.role_required([UserType.ADMIN, UserType.OFFICER])
 def resolve_complaint(complaint_id):
-
     # get complaint
     url = f"http://localhost:3000/query?channelid=mychannel&chaincodeid=complaint&function=ReadAsset&args={complaint_id}"
     payload = {}
     headers = {
     'content-type': 'application/x-www-form-urlencoded'
     }
-
     response = requests.request("GET", url, headers=headers, data=payload)
     complaint = json.loads(response.text)
 

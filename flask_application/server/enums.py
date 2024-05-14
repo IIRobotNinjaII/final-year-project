@@ -20,19 +20,19 @@ class Residence(Enum):
 
 class Department(Enum):
     BIOTECHNOLOGY = 'biotechnology'
-    CHEMICAL_ENGINEERING = 'chemical engineering'
+    CHEMICALENGINEERING = 'chemical engineering'
     CHEMISTRY = 'chemistry'
-    CIVIL_ENGINEERING = 'civil engineering'
-    COMPUTER_SCIENCE_AND_ENGINEERING = 'computer science and engineering'
-    ELECTRICAL_ENGINEERING = 'electrical engineering'
-    ELECTRONICS_AND_COMMUNICATION = 'electronics and communication'
-    HUMANITIES_AND_SOCIAL_SCIENCE = 'humanities and social science'
-    MANAGEMENT_STUDIES = 'management studies'
+    CIVILENGINEERING = 'civil engineering'
+    COMPUTERSCIENCEANDENGINEERING = 'computer science and engineering'
+    ELECTRICALENGINEERING = 'electrical engineering'
+    ELECTRONICSANDCOMMUNICATION = 'electronics and communication'
+    HUMANITIESANDSOCIALSCIENCE = 'humanities and social science'
+    MANAGEMENTSTUDIES = 'management studies'
     MATHEMATICS = 'mathematics'
-    MECHANICAL_ENGINEERING = 'mechanical engineering'
-    METALLURGICAL_AND_MATERIALS_ENGINEERING = 'metallurgical and materials engineering'
+    MECHANICALENGINEERING = 'mechanical engineering'
+    METALLURGICALANDMATERIALSENGINEERING = 'metallurgical and materials engineering'
     PHYSICS = 'physics'
-    PHYSICAL_EDUCATION = 'physical education'
+    PHYSICALEDUCATION = 'physical education'
     # None for officer
 
 class AccountComplaintType(Enum):

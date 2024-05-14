@@ -19,11 +19,11 @@
   display: none;
 }
 
-.submit-complaint-form {
-  display: flex;
-  justify-content: flex-end;
-  position: sticky;
-}
+  /* .submit-complaint-form {
+    display: flex;
+    justify-content: flex-end;
+    position: sticky;
+  } */
 
 .header {
   display: flex;
@@ -42,6 +42,7 @@
 
 .header .header-btn { 
   padding: 10px 15px;
+  margin: 0 5px;
   cursor: pointer;
   border-radius: 20px;
   background-color: rgb(246, 246, 246);
@@ -50,28 +51,31 @@
 
 
 .complaint-card {
-  display: flex;
+  display: column;
   justify-content: space-around;
 
-  max-height: 40vh;
-  min-height: 10vh;
+  min-height: 10vh; /* Change min-height to a percentage value */
+  max-height: none;
   
   border-radius: 8px;
   padding: 20px;
   
   margin: 1vw 0;
-  cursor: pointer;
+  cursor: default;
   background-color: rgb(246, 246, 246);
   box-shadow: 0 6px 9px rgb(191, 192, 192);
 }
 
-.complaint-card h3 {
-  width: 2vw;
-  padding: 5px 10px;
+.complaint-id {
+  width: auto;
+  padding: 5px 5px;
+  padding-left: 1px;
+  padding-bottom: 0px;
+  margin-bottom: 1px;
 }
 
 .complaint-details {
-  width: 46vw;
+  min-width: 46vw;
   overflow-y: auto;
 }
 
@@ -79,4 +83,99 @@
   width: 1px; 
   background-color: #eef5ff; 
   margin: 20px 0;
+}
+
+.comment-author {
+  color: black;
+  font-weight: bold; /* Make text bold */
+  font-size: 0.9rem;
+}
+
+
+.no-complaints-found {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: black;
+}
+
+.no-complaints-found {
+  max-width: 55vw;
+  padding: 20px;
+  border-radius: 8px;
+   background-color: rgb(246, 246, 246);
+  box-shadow: 0 6px 9px rgb(191, 192, 192);
+  font-size: 24px
+}
+
+
+.selected {
+  color: green; /* Change the color to indicate selection */
+  border: 2px solid green; /* Add a border to indicate selection */
+}
+
+.selecte {
+  color: red; /* Change the color to indicate selection */
+  border: 2px solid red; /* Add a border to indicate selection */
+}
+
+.category {
+  margin-top: 20px; /* Adjust as needed */
+  border-top: 2px solid #ccc; /* Add border between categories */
+  padding-top: 10px; /* Add some space above the category name */
+}
+
+.category h2 {
+  font-size: 1.2rem; /* Adjust font size as needed */
+  color: #333; /* Adjust text color */
+}
+
+.comment {
+  margin-bottom: 10px;
+}
+
+.comment-header {
+  font-size: 0.8rem; /* smaller font size */
+  color: #666; /* color for smaller text */
+  display: flex;
+  justify-content: space-between;
+}
+
+.comment-author,
+.comment-date {
+  margin-right: 10px; /* space between author and date */
+}
+
+.comment-content {
+  margin-top: 5px; /* space between header and content */
+}
+
+/* Styles for comment section */
+.complaint-card textarea {
+  width: calc(100% - 50px); /* Adjust width to fit within card padding */
+  max-width: 100%; /* Ensure textarea doesn't overflow */
+  height: 70px; /* Reduce height of textarea */
+  resize: vertical; /* Allow vertical resizing */
+  margin-bottom: 10px; /* Add some space below textarea */
+  padding: 5px; /* Add padding inside textarea */
+  border: 1px solid #ccc; /* Add a border */
+  border-radius: 4px; /* Add border radius */
+  font-size: 14px;
+}
+
+
+.complaint-card .comment-section {
+  padding: 0 20px; /* Add padding to comment section */
+}
+
+.submit-button{
+  width: 100%; /* Make button width match its container */
+  margin-top: 10px; /* Add space between textarea and button */
+}
+
+/* Styles for resolve button */
+.resolve-button {
+  width: 100%; /* Adjust width to fit within card padding */
+  margin-top: 10px; /* Add space between textarea and resolve button */
 }
